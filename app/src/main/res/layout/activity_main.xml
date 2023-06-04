@@ -54,6 +54,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:src="@drawable/outline_wb_sunny_24"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/locationTv" />
@@ -111,12 +112,12 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:padding="5dp"
+                android:visibility="gone"
                 app:cardCornerRadius="7dp"
                 app:contentPadding="5dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/minMaxLL">
-
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -207,7 +208,6 @@
 
                     </LinearLayout>
 
-
                 </LinearLayout>
             </androidx.appcompat.widget.LinearLayoutCompat>
 
@@ -218,19 +218,18 @@
                 android:layout_margin="3dp"
                 android:orientation="horizontal"
                 android:padding="5dp"
+                android:visibility="gone"
                 app:cardCornerRadius="7dp"
                 app:contentPadding="5dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/mainCv">
 
-
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="100dp"
                     android:layout_margin="5dp"
                     android:layout_weight="1"
-
                     android:background="@drawable/round_corner"
                     android:orientation="vertical"
                     android:padding="5dp">
@@ -262,7 +261,6 @@
                             android:padding="5dp"
                             android:text=""
                             android:textColor="@color/white"
-
                             android:textSize="20sp"
                             android:textStyle="bold" />
 
@@ -272,6 +270,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/humidityLL"
                     android:layout_width="0dp"
                     android:layout_height="100dp"
                     android:layout_gravity="center"
@@ -322,7 +321,6 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/ll3">
-
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -432,7 +430,6 @@
                             android:text="Visibility"
                             android:textColor="@color/black"
                             android:textStyle="bold" />
-
 
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>

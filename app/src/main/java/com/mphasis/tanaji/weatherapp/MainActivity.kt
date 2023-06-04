@@ -14,6 +14,7 @@ import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.view.View
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.appcompat.widget.SearchView
@@ -65,12 +66,18 @@ class MainActivity : ComponentActivity(), InternetConnectionListener, GpsLocatio
         binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
                 if (query.isNotEmpty()) {
-                    binding.locationTv.text = query.toString()
+                    if (isOnline()) {
+                        binding.searchView.clearFocus()
+                        //binding.searchView.setQuery("", false)
 
-                    getCityWiseData(
-                        "",
-                        "", query.toString()
-                    )
+                        binding.locationTv.text = query.trim()
+                        getCityWiseData(
+                            "",
+                            "", query.trim()
+                        )
+                    } else {
+                        binding.mainLayout.showSnackBar("No internet")
+                    }
                 }
                 return true
             }
@@ -127,36 +134,43 @@ class MainActivity : ComponentActivity(), InternetConnectionListener, GpsLocatio
         }
 
         mainViewModel.weatherResponse.observe(this) {
-            it?.let {
-                it.data.current_condition.apply {
-                    val current = get(0)
-                    // binding.tempTv.text = "$temp°"
-                    //
+            it?.let { it1 ->
+                it1.data.let { it2 ->
+                    it2?.current_condition?.apply {
+                        val current = get(0)
+                        // binding.tempTv.text = "$temp°"
+                        //
 
-                    Glide.with(context).load(current.weatherIconUrl[0].value)
-                        .placeholder(R.drawable.outline_wb_sunny_24)
-                        .apply(RequestOptions.skipMemoryCacheOf(true))
-                        .apply(RequestOptions.diskCacheStrategyOf(DiskCacheStrategy.NONE))
-                        .dontAnimate()
-                        .into(binding.weatherIconIv)
+                        Glide.with(context).load(current.weatherIconUrl[0].value)
+                            .placeholder(R.drawable.outline_wb_sunny_24)
+                            .apply(RequestOptions.skipMemoryCacheOf(true))
+                            .apply(RequestOptions.diskCacheStrategyOf(DiskCacheStrategy.NONE))
+                            .dontAnimate()
+                            .into(binding.weatherIconIv)
 
-                    binding.minTempTv.text = "L:${current.temp_C}°"
-                    binding.maxTempTv.text = "H:${current.temp_F}°"
-                    binding.pressureTv.text = "${current.pressure} hpa"
-                    binding.tvFeelLike.text = "${current.FeelsLikeC}°"
-                    binding.humidityTv.text = "${current.humidity}%"
-                    binding.degreeTv.text = "Direction: ${current.winddirDegree}°"
-                    binding.speedTv.text = "${current.windspeedMiles} miles"
-//                    binding.seaLevelTv.text = "Sea:" + sea_level.toString()
-//                    binding.grandLevelTv.text = "Grand:" + grnd_level.toString()
+                        binding.minTempTv.text = "L:${current.temp_C}°"
+                        binding.maxTempTv.text = "H:${current.temp_F}°"
+                        binding.pressureTv.text = "${current.pressure} hpa"
+                        binding.tvFeelLike.text = "${current.FeelsLikeC}°"
+                        binding.humidityTv.text = "${current.humidity}%"
+                        binding.degreeTv.text = "Direction: ${current.winddirDegree}°"
+                        binding.speedTv.text = "${current.windspeedMiles} miles"
+                        //                    binding.seaLevelTv.text = "Sea:" + sea_level.toString()
+                        //                    binding.grandLevelTv.text = "Grand:" + grnd_level.toString()
+
+                        //                it.sys.apply {
+                        //                    binding.sunRiceTv.text = "Rise: ${Utilities.convertDate(sunrise.toLong())}"
+                        //                    binding.sunsetTv.text = "Set: ${Utilities.convertDate(sunset.toLong())}"
+                        //                }
+
+                        binding.weatherIconIv.visibility = View.VISIBLE
+                        binding.mainCv.visibility = View.VISIBLE
+                        binding.ll3.visibility = View.VISIBLE
+                        binding.humidityLL.visibility = View.VISIBLE
+                        binding.weatherDetailsRecyclerView.adapter =
+                            WeatherAdapter(context, it2.weather)
+                    }
                 }
-
-//                it.sys.apply {
-//                    binding.sunRiceTv.text = "Rise: ${Utilities.convertDate(sunrise.toLong())}"
-//                    binding.sunsetTv.text = "Set: ${Utilities.convertDate(sunset.toLong())}"
-//                }
-                binding.weatherDetailsRecyclerView.adapter =
-                    WeatherAdapter(context, it.data.weather)
             }
         }
     }
@@ -166,6 +180,8 @@ class MainActivity : ComponentActivity(), InternetConnectionListener, GpsLocatio
         binding.weatherDetailsRecyclerView.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         checkPermissions(true)
+        binding.searchView.isIconified = false
+        binding.searchView.clearFocus()
 
 
 //        if (isOnline(context)) {
@@ -206,7 +222,7 @@ class MainActivity : ComponentActivity(), InternetConnectionListener, GpsLocatio
             setTitle("Location Permission")
             setCancelable(false)
             setIcon(R.drawable.ic_alerted)
-            setMessage("Location permissions mandatory for this app")
+            setMessage("Location permissions is not enabled for this app")
             setPositiveButton("Ok") { dialog, _ ->
                 dialog.dismiss()
                 //provideLocationAccess()
@@ -222,33 +238,9 @@ class MainActivity : ComponentActivity(), InternetConnectionListener, GpsLocatio
             ) { dialog, _ ->
                 dialog.dismiss()
                 //provideLocationAccess()
-                finish()
+                //finish()
             }
         }
-
-        alertDialog.create()
-        alertDialog.show()
-    }
-
-
-    private fun provideLocationAccess() {
-        val alertDialog = AlertDialog.Builder(context).apply {
-            setTitle("Permission")
-            setCancelable(false)
-            setIcon(R.drawable.ic_alerted)
-            setMessage("Please grant permission for location")
-
-            setPositiveButton("Ok") { _, _ ->
-                context.startActivity(
-                    Intent(
-                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                        Uri.fromParts("package", context.packageName, null)
-                    )
-                )
-            }
-            setNegativeButton("cancel") { _, _ -> }
-        }
-
 
         alertDialog.create()
         alertDialog.show()
@@ -279,10 +271,11 @@ class MainActivity : ComponentActivity(), InternetConnectionListener, GpsLocatio
         when (requestCode) {
             MY_PERMISSIONS_REQUEST_LOCATION -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this, "Permission Granted", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "Location Permission is Granted", Toast.LENGTH_LONG).show()
                     getAddressFromLatLng()
                 } else {
-                    Toast.makeText(this, "Permission Denied", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "Location permission is not enabled", Toast.LENGTH_LONG)
+                        .show()
                     // finish()
                     permissionPrompt()
                 }
@@ -338,7 +331,7 @@ class MainActivity : ComponentActivity(), InternetConnectionListener, GpsLocatio
     }
 
     @SuppressLint("MissingPermission")
-    private fun getAddressFromLatLng()/*: List<Address> */ {
+    private fun getAddressFromLatLng() {
         try {
             if (isOnline()) {
 
@@ -356,15 +349,13 @@ class MainActivity : ComponentActivity(), InternetConnectionListener, GpsLocatio
                                 1
                             )
                             addresses?.let {
-                                val address: String =
-                                    addresses[0].getAddressLine(0) // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
-                                val city: String = addresses[0].locality
-                                val state: String = addresses[0].adminArea
-                                val country: String = addresses[0].countryName
-                                val postalCode: String = addresses[0].postalCode
-                                val knownName: String =
-                                    addresses[0].featureName // Only if available else return NULL
-                                binding.locationTv.text = city
+                                //val address: String = addresses[0].getAddressLine(0)
+                                val city: String = addresses[0].locality.trim()
+//                                val state: String = addresses[0].adminArea
+//                                val country: String = addresses[0].countryName
+//                                val postalCode: String = addresses[0].postalCode
+//                                val knownName: String = addresses[0].featureName
+                                binding.locationTv.text = city.trim()
 
                                 getCityWiseData(
                                     location.latitude.toString(),
@@ -382,8 +373,5 @@ class MainActivity : ComponentActivity(), InternetConnectionListener, GpsLocatio
         } catch (e: Exception) {
             e.printStackTrace()
         }
-
-        //return addresses
     }
-
 }

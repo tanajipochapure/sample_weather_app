@@ -1,5 +1,5 @@
 package com.mphasis.tanaji.weatherapp.model
-data class CityWiseModelNew(val `data`: Data){
+data class CityWiseModelNew(val `data`: Data?){
 
     data class Data(
         val ClimateAverages: List<ClimateAverage>,

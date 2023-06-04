@@ -36,6 +36,18 @@ class WeatherAdapter(
         return cityWiseList.size
     }
 
+    override fun getItemViewType(position: Int): Int {
+        return position
+    }
+
+    override fun setHasStableIds(hasStableIds: Boolean) {
+        super.setHasStableIds(hasStableIds)
+    }
+
+    override fun getItemId(position: Int): Long {
+        return super.getItemId(position)
+    }
+
     override fun onBindViewHolder(holder: Holder, position: Int) {
         val weather = cityWiseList[position]
         holder.dateTv.text = weather.date
